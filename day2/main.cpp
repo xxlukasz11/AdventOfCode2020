@@ -1,6 +1,6 @@
 #include <iostream>
 
 int main() {
-	std::cout << "common" << std::endl;
+	std::cout << "day 2" << std::endl;
 	return 0;
 }
