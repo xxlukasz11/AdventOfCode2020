@@ -348,3 +348,6 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+/AdventOfCode2020.sln
+/AdventOfCode2020.vcxproj
+/AdventOfCode2020.vcxproj.filters
