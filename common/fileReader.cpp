@@ -1,4 +1,7 @@
+#include "pch.h"
 #include "fileReader.h"
+
+namespace common {
 
 FileReader::FileReader(const std::string& fileName) : mFileName(fileName) {
 	mStream.open(mFileName);
@@ -25,4 +28,6 @@ std::string FileReader::nextWord() {
 
 bool FileReader::nextWord(std::string& word) {
 	return static_cast<bool>(mStream >> word);
+}
+
 }
