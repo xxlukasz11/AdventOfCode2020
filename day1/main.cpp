@@ -3,13 +3,15 @@
 #include <tuple>
 #include "../common/fileReader.h"
 
+constexpr long EXPECTED_SUM = 2020;
+
 std::pair<long, long> find2020Pair(const std::vector<long>& values) {
 	const long valuesSize = values.size();
 	for (long i = 0; i < valuesSize; ++i) {
 		for (long j = i + 1; j < valuesSize; ++j) {
 			const long val1 = values[i];
 			const long val2 = values[j];
-			if (val1 + val2 == 2020) {
+			if (val1 + val2 == EXPECTED_SUM) {
 				return { val1, val2 };
 			}
 		}
@@ -24,7 +26,7 @@ std::tuple<long, long, long> find2020Triplet(const std::vector<long>& values) {
 				const long val1 = values[i];
 				const long val2 = values[j];
 				const long val3 = values[k];
-				if (val1 + val2 + val3 == 2020) {
+				if (val1 + val2 + val3 == EXPECTED_SUM) {
 					return { val1, val2, val3 };
 				}
 			}
@@ -50,6 +52,7 @@ int main() {
 		const long value = std::stol(line);
 		values.push_back(value);
 	}
+	partOne(values);
 	partTwo(values);
 	return 0;
 }
