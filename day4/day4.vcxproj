@@ -145,10 +145,32 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="byr.cpp" />
+    <ClCompile Include="cid.cpp" />
+    <ClCompile Include="document.cpp" />
+    <ClCompile Include="ecl.cpp" />
+    <ClCompile Include="eyr.cpp" />
+    <ClCompile Include="field.cpp" />
+    <ClCompile Include="hcl.cpp" />
+    <ClCompile Include="hgt.cpp" />
+    <ClCompile Include="iyr.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="pid.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="input.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="byr.h" />
+    <ClInclude Include="cid.h" />
+    <ClInclude Include="document.h" />
+    <ClInclude Include="ecl.h" />
+    <ClInclude Include="eyr.h" />
+    <ClInclude Include="field.h" />
+    <ClInclude Include="hcl.h" />
+    <ClInclude Include="hgt.h" />
+    <ClInclude Include="iyr.h" />
+    <ClInclude Include="pid.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
