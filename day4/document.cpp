@@ -2,14 +2,14 @@
 #include "document.h"
 
 Document::Document() {
-	mFieldMap["byr"] = std::make_unique<Byr>();
-	mFieldMap["iyr"] = std::make_unique<Iyr>();
-	mFieldMap["eyr"] = std::make_unique<Eyr>();
-	mFieldMap["hgt"] = std::make_unique<Hgt>();
-	mFieldMap["hcl"] = std::make_unique<Hcl>();
-	mFieldMap["ecl"] = std::make_unique<Ecl>();
-	mFieldMap["pid"] = std::make_unique<Pid>();
-	mFieldMap["cid"] = std::make_unique<Cid>();
+	mFieldMap["byr"] = std::make_shared<Byr>();
+	mFieldMap["iyr"] = std::make_shared<Iyr>();
+	mFieldMap["eyr"] = std::make_shared<Eyr>();
+	mFieldMap["hgt"] = std::make_shared<Hgt>();
+	mFieldMap["hcl"] = std::make_shared<Hcl>();
+	mFieldMap["ecl"] = std::make_shared<Ecl>();
+	mFieldMap["pid"] = std::make_shared<Pid>();
+	mFieldMap["cid"] = std::make_shared<Cid>();
 }
 
 void Document::setField(const std::string& fieldName, const std::string& value) {
