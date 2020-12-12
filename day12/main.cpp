@@ -2,8 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <algorithm>
-#include <numeric>
+#include <cmath>
 #include <unordered_map>
 
 struct Instruction {
@@ -99,7 +98,7 @@ void partOne(const DataType& data) {
 
 Waypoint rotateWaypoint(const Waypoint waypoint, const char command, const int value) {
 	if (value == 180) {
-		return Waypoint{-waypoint.horizontal, -waypoint.vertical};
+		return {-waypoint.horizontal, -waypoint.vertical};
 	}
 	if (value == 90) {
 		if (command == 'L') {
