@@ -4,7 +4,6 @@
 #include <string>
 #include <sstream>
 #include <algorithm>
-#include <map>
 
 struct Range {
 	int min;
