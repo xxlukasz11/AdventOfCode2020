@@ -4,7 +4,6 @@
 #include <string>
 #include <sstream>
 #include <algorithm>
-#include <list>
 #include <regex>
 
 struct Rule {
@@ -19,9 +18,6 @@ struct Data {
 
 using DataType = Data;
 
-int A_RULE;
-int B_RULE;
-
 DataType read() {
 	common::FileReader reader("input.txt");
 	DataType data;
@@ -33,12 +29,6 @@ DataType read() {
 		auto secondPart = line.substr(firstSpace + 1);
 		if (secondPart.size() > 1 && (secondPart[1] == 'a' || secondPart[1] == 'b')) {
 			rule.str = secondPart[1];
-			if (rule.str == "a") {
-				A_RULE = rule.index;
-			}
-			else {
-				B_RULE = rule.index;
-			}
 		}
 		else {
 			rule.str = secondPart;
@@ -52,11 +42,7 @@ DataType read() {
 	return data;
 }
 
-bool isBasicRule(int index) {
-	return index == A_RULE || index == B_RULE;
-}
-
-std::regex createRegexforRuleZero(const std::vector<Rule>& rules) {
+std::regex createRegexForRuleZero(const std::vector<Rule>& rules) {
 	bool changed = true;
 	auto ruleZero = rules.front().str;
 	int loops = 0;
@@ -74,11 +60,14 @@ std::regex createRegexforRuleZero(const std::vector<Rule>& rules) {
 				else if (index == 11 && loops > 1) {
 					out << " " << 42 << " " << 31 << " ";
 				}
-				else if (isBasicRule(index)) {
-					out << " " << rules[index].str << " ";
-				}
 				else {
-					out << " ( " << rules[index].str << " ) ";
+					auto str = rules[index].str;
+					if (str == "a" || str == "b") {
+						out << " " << rules[index].str << " ";
+					}
+					else {
+						out << " ( " << rules[index].str << " ) ";
+					}
 				}
 			}
 			else {
@@ -112,7 +101,7 @@ int countValidMessages(const std::vector<std::string>& messages, const std::rege
 }
 
 void partOne(const DataType& data) {
-	std::regex reg = createRegexforRuleZero(data.rules);
+	std::regex reg = createRegexForRuleZero(data.rules);
 	int count = countValidMessages(data.messages, reg);
 
 	std::cout << "Part one: " << count << std::endl;
@@ -123,7 +112,7 @@ void partTwo(const DataType& data) {
 	rules[8].str = "42 | 42 8";
 	rules[11].str = "42 31 | 42 11 31";
 	
-	std::regex reg = createRegexforRuleZero(rules);
+	std::regex reg = createRegexForRuleZero(rules);
 	int count = countValidMessages(data.messages, reg);
 	std::cout << "Part two: " << count << std::endl;
 }
