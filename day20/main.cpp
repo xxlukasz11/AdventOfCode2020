@@ -3,12 +3,7 @@
 #include <vector>
 #include <string>
 #include <deque>
-
-//#include <sstream>
 #include <algorithm>
-//#include <numeric>
-#include <unordered_map>
-#include <map>
 
 struct Tile {
 	int id;
@@ -20,13 +15,12 @@ struct Tile {
 };
 
 using DataType = std::vector<Tile>;
+using TileGridType = std::vector<std::vector<Tile*>>;
+using SeaMapType = std::vector<std::vector<char>>;
 
 enum BorderType {
-	NONE,
-	TOP,
-	LEFT,
-	RIGHT,
-	BOTTOM,
+	CENTER,
+	FRAME,
 	TOP_LEFT,
 	TOP_RIGHT,
 	BOTTOM_LEFT,
@@ -59,7 +53,7 @@ DataType read() {
 }
 
 template<typename T>
-void rotateMatrix(T&& matrix) {
+void rotateMatrix90(T&& matrix) {
 	const int size = matrix.size();
 	for (int x = 0; x < size / 2; x++) {
 		for (int y = x; y < size - x - 1; y++) {
@@ -99,10 +93,10 @@ void rotate90(Tile& tile) {
 	std::swap(tile.right, tile.top);
 	std::reverse(tile.left.begin(), tile.left.end());
 	std::reverse(tile.right.begin(), tile.right.end());
-	rotateMatrix(tile.map);
+	rotateMatrix90(tile.map);
 }
 
-BorderType lookForBorder(std::vector<Tile*> pool, int i) {
+BorderType determineTilePlacement(std::vector<Tile*> pool, int i) {
 	auto center = *(pool[i]);
 	pool.erase(pool.begin() + i);
 	bool topFree = true;
@@ -152,58 +146,15 @@ BorderType lookForBorder(std::vector<Tile*> pool, int i) {
 	if (topFree && rightFree) {
 		return TOP_RIGHT;
 	}
-	if (bottomFree) {
-		return BOTTOM;
+	if (bottomFree || topFree || leftFree || rightFree) {
+		return FRAME;
 	}
-	if (topFree) {
-		return TOP;
-	}
-	if (leftFree) {
-		return LEFT;
-	}
-	if (rightFree) {
-		return RIGHT;
-	}
-	return NONE;
-}
-
-void partOne(DataType data) {
-	std::vector<Tile*> pool;
-	for (auto& tile : data) {
-		pool.push_back(&tile);
-	}
-
-	int64_t mul = 1;
-	for (int i = 0; i < data.size(); ++i) {
-		auto border = lookForBorder(pool, i);
-		if (border == TOP_LEFT || border == TOP_RIGHT || border == BOTTOM_LEFT || border == BOTTOM_RIGHT) {
-			mul *= data[i].id;
-		}
-	}
-	std::cout << "Part one: " << mul << std::endl;
-}
-
-int findMatchingLeftBorder(const std::string& border, std::vector<std::pair<Tile*, BorderType>>& tiles) {
-	for (int i = 0; i < tiles.size(); ++i) {
-		auto& [tile, type] = tiles[i];
-		if (type == LEFT) {
-			rotate90(*tile);
-		} else if (type == BOTTOM) {
-			rotate180(*tile);
-		} else if (type == RIGHT) {
-			rotate180(*tile);
-			rotate90(*tile);
-		}
-		if (border == tile->left) {
-			return i;
-		}
-	}
-	return -1;
+	return CENTER;
 }
 
 int findMatchingLeft(const std::string& border, std::vector<Tile*>& tiles) {
 	for (int i = 0; i < tiles.size(); ++i) {
-		auto& tile = tiles[i];
+		auto tile = tiles[i];
 		if (border == tile->left) {
 			return i;
 		}
@@ -277,7 +228,45 @@ int findMatchingTop(const std::string& border, std::vector<Tile*>& tiles) {
 	return -1;
 }
 
-bool findSeaMonster(std::vector<std::vector<char>>& seaMap, int x, int y) {
+int findMatchingTopLeft(const std::string& borderTop, const std::string& borderLeft, std::vector<Tile*>& tiles) {
+	for (int i = 0; i < tiles.size(); ++i) {
+		auto tile = tiles[i];
+		if (borderTop == tile->top && borderLeft == tile->left) {
+			return i;
+		}
+		rotate90(*tile);
+		if (borderTop == tile->top && borderLeft == tile->left) {
+			return i;
+		}
+		rotate90(*tile);
+		if (borderTop == tile->top && borderLeft == tile->left) {
+			return i;
+		}
+		rotate90(*tile);
+		if (borderTop == tile->top && borderLeft == tile->left) {
+			return i;
+		}
+		flipHorizontal(*tile);
+		if (borderTop == tile->top && borderLeft == tile->left) {
+			return i;
+		}
+		rotate90(*tile);
+		if (borderTop == tile->top && borderLeft == tile->left) {
+			return i;
+		}
+		rotate90(*tile);
+		if (borderTop == tile->top && borderLeft == tile->left) {
+			return i;
+		}
+		rotate90(*tile);
+		if (borderTop == tile->top && borderLeft == tile->left) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+bool findSeaMonster(SeaMapType& seaMap, int x, int y) {
 	static const std::vector<std::pair<int, int>> directives{
 		{1,1},
 		{3,0},
@@ -314,9 +303,9 @@ bool findSeaMonster(std::vector<std::vector<char>>& seaMap, int x, int y) {
 	return false;
 }
 
-void partTwo(DataType data) {
+TileGridType assembleTiles(DataType& data) {
 	const int tilesInRow = sqrt(data.size());
-	std::vector<std::vector<Tile*>> grid(tilesInRow, std::vector<Tile*>(tilesInRow, nullptr));
+	TileGridType grid(tilesInRow, std::vector<Tile*>(tilesInRow, nullptr));
 	std::vector<Tile*> pool;
 	for (auto& tile : data) {
 		pool.push_back(&tile);
@@ -326,8 +315,8 @@ void partTwo(DataType data) {
 	std::vector<Tile*> centers;
 	std::vector<Tile*> frame;
 	for (int i = 0; i < pool.size(); ++i) {
-		auto borderType = lookForBorder(pool, i);
-		if (borderType == NONE) {
+		auto borderType = determineTilePlacement(pool, i);
+		if (borderType == CENTER) {
 			centers.push_back(pool[i]);
 		} else if (borderType == TOP_LEFT) {
 			topLeft = pool[i];
@@ -342,10 +331,6 @@ void partTwo(DataType data) {
 	auto previous = topLeft;
 	for (int i = 1; i < tilesInRow; ++i) {
 		auto index = findMatchingLeft(previous->right, frame);
-		if (index < 0) {
-			std::cout << "No tile found" << std::endl;
-			return;
-		}
 		previous = frame[index];
 		grid[0][i] = previous;
 		frame.erase(frame.begin() + index);
@@ -355,81 +340,72 @@ void partTwo(DataType data) {
 	previous = topLeft;
 	for (int i = 1; i < tilesInRow; ++i) {
 		auto index = findMatchingTop(previous->bottom, frame);
-		if (index < 0) {
-			std::cout << "No tile found" << std::endl;
-			return;
-		}
 		previous = frame[index];
 		grid[i][0] = previous;
 		frame.erase(frame.begin() + index);
 	}
 
 	// fill bottom border
-	previous = grid[tilesInRow-1][0];
+	previous = grid[tilesInRow - 1][0];
 	for (int i = 1; i < tilesInRow; ++i) {
 		auto index = findMatchingLeft(previous->right, frame);
-		if (index < 0) {
-			std::cout << "No tile found" << std::endl;
-			return;
-		}
 		previous = frame[index];
-		grid[tilesInRow-1][i] = previous;
+		grid[tilesInRow - 1][i] = previous;
 		frame.erase(frame.begin() + index);
 	}
 
 	// fill right border
-	previous = grid[0][tilesInRow-1];
-	for (int i = 1; i < tilesInRow-1; ++i) {
+	previous = grid[0][tilesInRow - 1];
+	for (int i = 1; i < tilesInRow - 1; ++i) {
 		auto index = findMatchingTop(previous->bottom, frame);
-		if (index < 0) {
-			std::cout << "No tile found at " << i << std::endl;
-			return;
-		}
 		previous = frame[index];
-		grid[i][tilesInRow-1] = previous;
+		grid[i][tilesInRow - 1] = previous;
 		frame.erase(frame.begin() + index);
 	}
 
-	for (int x = 1; x < tilesInRow-1; ++x) {
-		previous = grid[0][x];
-		for (int i = 1; i < tilesInRow-1; ++i) {
-			auto index = findMatchingTop(previous->bottom, centers);
-			if (index < 0) {
-				std::cout << "No tile found" << std::endl;
-				return;
-			}
-			previous = centers[index];
-			grid[i][x] = previous;
+	// fill center
+	Tile* previousTop;
+	Tile* previousLeft;
+	for (int x = 1; x < tilesInRow - 1; ++x) {
+		previousTop = grid[0][x];
+		for (int i = 1; i < tilesInRow - 1; ++i) {
+			previousLeft = grid[i][x - 1];
+			auto index = findMatchingTopLeft(previousTop->bottom, previousLeft->right, centers);
+			previousTop = centers[index];
+			grid[i][x] = previousTop;
 			centers.erase(centers.begin() + index);
 		}
 	}
+	return grid;
+}
 
-	
+void printAssembledTiles(const TileGridType& grid) {
 	for (const auto& gridRow : grid) {
+		const auto tilesInRow = gridRow.size();
 		const auto tileSize = gridRow.front()->map.size();
-		int tileIndex = 0;
-		for (int i = 0; i < tileSize; ++i) {
+		const auto totalSteps = tilesInRow * tileSize;
+		for (int mapRow = 0; mapRow < tileSize; ++mapRow) {
 			bool spaced = true;
-			for (int j = 0; j < tileSize * gridRow.size(); ++j) {
-				if (j % tileSize == 0 && !spaced) {
-					std::cout << " ";
-					--j;
+			for (int i = 0; i < totalSteps; ++i) {
+				if (i % tileSize == 0 && !spaced) {
 					spaced = true;
+					--i;
+					std::cout << " ";
 				} else {
-					std::cout << gridRow[tileIndex]->map[i][j % tileSize];
-					tileIndex = j / tileSize;
 					spaced = false;
+					const auto tileIndex = i / tileSize;
+					const auto mapColumn = i % tileSize;
+					std::cout << gridRow[tileIndex]->map[mapRow][mapColumn];
 				}
-				
 			}
 			std::cout << std::endl;
 		}
 		std::cout << std::endl;
 	}
 	std::cout << std::endl;
-	
+}
 
-	// trim
+SeaMapType generateSeaMap(TileGridType& grid) {
 	for (auto& row : grid) {
 		for (auto& tile : row) {
 			tile->map.pop_front();
@@ -441,10 +417,11 @@ void partTwo(DataType data) {
 		}
 	}
 
-	const int newTileSize = topLeft->map.size();
+	const int tilesInRow = grid.size();
+	const int newTileSize = grid[0][0]->map.size();
 	const int seaSize = tilesInRow * newTileSize;
 
-	std::vector<std::vector<char>> seaMap(seaSize, std::vector<char>(seaSize, '\0'));
+	SeaMapType seaMap(seaSize, std::vector<char>(seaSize, '\0'));
 	for (int y = 0; y < grid.size(); ++y) {
 		for (int x = 0; x < grid.size(); ++x) {
 			const auto& map = grid[y][x]->map;
@@ -455,7 +432,11 @@ void partTwo(DataType data) {
 			}
 		}
 	}
+	return seaMap;
+}
 
+int countSeaMonsters(SeaMapType& seaMap) {
+	const int seaSize = seaMap.size();
 	int monsters = 0;
 	for (int y = 0; y < seaSize; ++y) {
 		for (int x = 0; x < seaSize; ++x) {
@@ -464,73 +445,56 @@ void partTwo(DataType data) {
 			}
 		}
 	}
-	rotateMatrix(seaMap);
-	for (int y = 0; y < seaSize; ++y) {
-		for (int x = 0; x < seaSize; ++x) {
-			if (findSeaMonster(seaMap, x, y)) {
-				++monsters;
-			}
-		}
-	}
-	rotateMatrix(seaMap);
-	for (int y = 0; y < seaSize; ++y) {
-		for (int x = 0; x < seaSize; ++x) {
-			if (findSeaMonster(seaMap, x, y)) {
-				++monsters;
-			}
-		}
-	}
-	rotateMatrix(seaMap);
-	for (int y = 0; y < seaSize; ++y) {
-		for (int x = 0; x < seaSize; ++x) {
-			if (findSeaMonster(seaMap, x, y)) {
-				++monsters;
-			}
-		}
-	}
-	std::reverse(seaMap.begin(), seaMap.end());
-	for (int y = 0; y < seaSize; ++y) {
-		for (int x = 0; x < seaSize; ++x) {
-			if (findSeaMonster(seaMap, x, y)) {
-				++monsters;
-			}
-		}
-	}
-	rotateMatrix(seaMap);
-	for (int y = 0; y < seaSize; ++y) {
-		for (int x = 0; x < seaSize; ++x) {
-			if (findSeaMonster(seaMap, x, y)) {
-				++monsters;
-			}
-		}
-	}
-	rotateMatrix(seaMap);
-	for (int y = 0; y < seaSize; ++y) {
-		for (int x = 0; x < seaSize; ++x) {
-			if (findSeaMonster(seaMap, x, y)) {
-				++monsters;
-			}
-		}
-	}
-	rotateMatrix(seaMap);
-	for (int y = 0; y < seaSize; ++y) {
-		for (int x = 0; x < seaSize; ++x) {
-			if (findSeaMonster(seaMap, x, y)) {
-				++monsters;
-			}
-		}
-	}
+	return monsters;
+}
 
-	std::reverse(seaMap.begin(), seaMap.end());
-	rotateMatrix(seaMap);
-	rotateMatrix(seaMap);
-	rotateMatrix(seaMap);
+void printSeaMap(const SeaMapType& seaMap) {
 	for (const auto& row : seaMap) {
 		for (const auto& value : row) {
 			std::cout << value;
 		}
 		std::cout << std::endl;
 	}
+}
+
+void partOne(DataType data) {
+	std::vector<Tile*> pool;
+	for (auto& tile : data) {
+		pool.push_back(&tile);
+	}
+
+	int64_t mul = 1;
+	for (int i = 0; i < data.size(); ++i) {
+		auto placement = determineTilePlacement(pool, i);
+		if (placement == TOP_LEFT || placement == TOP_RIGHT || placement == BOTTOM_LEFT || placement == BOTTOM_RIGHT) {
+			mul *= data[i].id;
+		}
+	}
+	std::cout << "Part one: " << mul << std::endl;
+}
+
+void partTwo(DataType data) {
+	TileGridType grid = assembleTiles(data);
+	printAssembledTiles(grid);
+	SeaMapType seaMap = generateSeaMap(grid);
+
+	int monsters = countSeaMonsters(seaMap);
+	rotateMatrix90(seaMap);
+	monsters += countSeaMonsters(seaMap);
+	rotateMatrix90(seaMap);
+	monsters += countSeaMonsters(seaMap);
+	rotateMatrix90(seaMap);
+	monsters += countSeaMonsters(seaMap);
+	std::reverse(seaMap.begin(), seaMap.end());
+	monsters += countSeaMonsters(seaMap);
+	rotateMatrix90(seaMap);
+	monsters += countSeaMonsters(seaMap);
+	rotateMatrix90(seaMap);
+	monsters += countSeaMonsters(seaMap);
+	rotateMatrix90(seaMap);
+	monsters += countSeaMonsters(seaMap);
+
+	printSeaMap(seaMap);
 
 	int hashCount = 0;
 	for (const auto& row : seaMap) {
