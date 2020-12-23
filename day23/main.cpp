@@ -1,4 +1,3 @@
-#include "../common/fileReader.h"
 #include <iostream>
 #include <vector>
 #include <string>
@@ -68,11 +67,8 @@ void makeMoves(DataType& data, const int moves) {
 void partOne(DataType data) {
 	makeMoves(data, 100);
 
-	while (data.front() != 1) {
-		auto newBegin = data.begin();
-		newBegin++;
-		std::rotate(data.begin(), newBegin, data.end());
-	}
+	auto newBegin = std::find(data.begin(), data.end(), 1);
+	std::rotate(data.begin(), newBegin, data.end());
 
 	std::stringstream stream;
 	for (const auto& value : data) {
@@ -102,7 +98,6 @@ void partTwo(DataType data) {
 
 int main() {
 	DataType data{ 5, 2, 3, 7, 6, 4, 8, 1, 9 };
-	//DataType data{ 3,8,9,1,2,5,4,6,7 };
 	
 	partOne(data);
 	partTwo(data);
