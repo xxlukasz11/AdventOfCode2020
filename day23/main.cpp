@@ -27,13 +27,13 @@ void makeMoves(DataType& data, const int moves) {
 	auto currentCup = data.begin();
 	for (int move = 0; move < moves; ++move) {
 
-		auto firstIt = getNextCup(data, currentCup);
+		const auto firstIt = getNextCup(data, currentCup);
 		const auto first = *firstIt;
 		data.erase(firstIt);
-		auto secondIt = getNextCup(data, currentCup);
+		const auto secondIt = getNextCup(data, currentCup);
 		const auto second = *secondIt;
 		data.erase(secondIt);
-		auto thirdIt = getNextCup(data, currentCup);
+		const auto thirdIt = getNextCup(data, currentCup);
 		const auto third = *thirdIt;
 		data.erase(thirdIt);
 
@@ -69,17 +69,14 @@ void partOne(DataType data) {
 
 	auto newBegin = std::find(data.begin(), data.end(), 1);
 	std::rotate(data.begin(), newBegin, data.end());
+	data.erase(data.begin());
 
 	std::stringstream stream;
-	for (const auto& value : data) {
+	for (const auto value : data) {
 		stream << value;
 	}
 
-	char one;
-	stream >> one;
-	std::string result;
-	stream >> result;
-	std::cout << "Part one: " << result << std::endl;
+	std::cout << "Part one: " << stream.str() << std::endl;
 }
 
 void partTwo(DataType data) {
@@ -89,10 +86,10 @@ void partTwo(DataType data) {
 	}
 	makeMoves(data, 10000000);
 
-	auto cupOne = std::find(data.begin(), data.end(), 1);
-	auto first = getNextCup(data, cupOne);
-	auto second = getNextCup(data, first);
-	int64_t result = ((int64_t)*first) * (*second);
+	const auto cupOne = std::find(data.begin(), data.end(), 1);
+	const auto first = getNextCup(data, cupOne);
+	const auto second = getNextCup(data, first);
+	const int64_t result = ((int64_t)*first) * (*second);
 	std::cout << "Part two: " << result << std::endl;
 }
 
