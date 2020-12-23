@@ -53,7 +53,7 @@ void makeMoves(DataType& data, const int moves) {
 			}
 		}
 
-		destinationCup++;
+		std::advance(destinationCup, 1);
 		auto last = data.insert(destinationCup, third);
 		iteratorRegistry[*last] = last;
 		last = data.insert(last, second);
