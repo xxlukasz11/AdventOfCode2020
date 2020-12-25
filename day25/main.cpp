@@ -1,32 +1,49 @@
 #include "../common/fileReader.h"
 #include <iostream>
-#include <vector>
-#include <string>
 
-using DataType = std::vector<int>;
+struct PublicKeys {
+	int key1;
+	int key2;
+};
+
+using DataType = PublicKeys;
+
+constexpr int DIVISOR = 20201227;
 
 DataType read() {
 	common::FileReader reader("input.txt");
 	DataType data;
-	for (std::string line; reader.nextLine(line);) {
-
-	}
+	data.key1 = std::stoi(reader.nextLine());
+	data.key2 = std::stoi(reader.nextLine());
 	return data;
 }
 
 void partOne(const DataType& data) {
+	int loopSize = 1;
+	const auto publicKey = data.key1;
+	const int subjectNumber = 7;
+	int64_t value = 1;
+	while (true) {
+		value *= subjectNumber;
+		value %= DIVISOR;
+		if (value == publicKey) {
+			break;
+		}
+		++loopSize;
+	}
 
-	std::cout << "Part one: " << std::endl;
-}
+	value = 1;
+	const auto otherPublicKey = data.key2;
+	for (int i = 0; i < loopSize; ++i) {
+		value *= otherPublicKey;
+		value %= DIVISOR;
+	}
 
-void partTwo(const DataType& data) {
-
-	std::cout << "Part two: " << std::endl;
+	std::cout << "Part one: " << value << std::endl;
 }
 
 int main() {
 	const auto data = read();
 	partOne(data);
-	partTwo(data);
 	return 0;
 }
