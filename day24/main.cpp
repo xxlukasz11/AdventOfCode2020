@@ -1,5 +1,5 @@
 #include "../common/fileReader.h"
-#include "../common/vec2d.h"
+#include "../common/Vec3.h"
 #include <iostream>
 #include <vector>
 #include <string>
@@ -30,7 +30,7 @@ constexpr int WHITE = 0;
 constexpr int BLACK = 1;
 
 using DataType = std::vector<std::vector<Instruction>>;
-using common::Vec2d;
+using common::Vec3;
 
 DataType read() {
 	common::FileReader reader("input.txt");
@@ -71,8 +71,8 @@ DataType read() {
 	return data;
 }
 
-std::map<Vec2d, bool> generateBlackTilesMap(const DataType& data) {
-	std::map<Vec2d, bool> isBlack;
+std::map<Vec3<int>, bool> generateBlackTilesMap(const DataType& data) {
+	std::map<Vec3<int>, bool> isBlack;
 	for (const auto& intructions : data) {
 		int x = 0;
 		int y = 0;
@@ -81,7 +81,7 @@ std::map<Vec2d, bool> generateBlackTilesMap(const DataType& data) {
 			x += vec.first;
 			y += vec.second;
 		}
-		Vec2d pos{ x, y };
+		Vec3<int> pos{ x, y, 0 };
 		auto& value = isBlack[pos];
 		value = !value;
 	}
@@ -89,7 +89,7 @@ std::map<Vec2d, bool> generateBlackTilesMap(const DataType& data) {
 }
 
 void partOne(const DataType& data) {
-	std::map<Vec2d, bool> isBlack = generateBlackTilesMap(data);
+	std::map<Vec3<int>, bool> isBlack = generateBlackTilesMap(data);
 	int count = 0;
 	for (const auto& entry : isBlack) {
 		if (entry.second == true) {
@@ -122,16 +122,16 @@ bool isPartOfHexagonalGrid(const int x, const int y, const int xCenter, const in
 }
 
 void partTwo(const DataType& data) {
-	std::map<Vec2d, bool> isBlack = generateBlackTilesMap(data);
+	std::map<Vec3<int>, bool> isBlack = generateBlackTilesMap(data);
 
 	int maxX = 0;
 	int maxY = 0;
 	for (const auto& entry : isBlack) {
-		if (abs(entry.first.getX()) > maxX) {
-			maxX = abs(entry.first.getX());
+		if (abs(entry.first.x) > maxX) {
+			maxX = abs(entry.first.x);
 		}
-		if (abs(entry.first.getY()) > maxY) {
-			maxY = abs(entry.first.getY());
+		if (abs(entry.first.y) > maxY) {
+			maxY = abs(entry.first.y);
 		}
 	}
 	
